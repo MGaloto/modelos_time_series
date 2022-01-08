@@ -186,21 +186,32 @@ plt.show()
 
 #%%
 
+# Probando un modelo MA
 
 
+end_date = "2015-01-01"
+
+# Ponemos a partir de la segunda linea:
+
+    
+# El modelo pronostica que los valores son cercanos a cero
+
+# Si aumentamos el orden tampoco es significativo
+
+model_ret_ma = ARIMA(df.ret_ftse[1:], order=(0,0,1))
+results_ret_ma = model_ret_ma.fit()
+
+df_pred_ma = results_ret_ma.predict(start = start_date, end = end_date) 
+
+df_pred_ma[start_date:end_date].plot(figsize = (20,5), color = "red")   
+df_test.ret_ftse[start_date:end_date].plot(color = "blue")
+plt.title("Predicciones vs Actual (Retornos)", size = 24)
+plt.show()
 
 
+# Los coeficientes no son significativos
 
-
-
-
-
-
-
-
-
-
-
+results_ret_ma.summary()    
 
 
 
@@ -208,23 +219,25 @@ plt.show()
 #%%
 
 
+# Estimando un modelo ARMA
+
+# El patron es similar al anterior ya que seguimos trabajando con datos no estacionarios.
+
+model_ret_arma = ARIMA(df.ret_ftse[1:], order=(1,0,1))
+results_ret_arma = model_ret_arma.fit()
+
+df_pred_arma = results_ret_arma.predict(start = start_date, end = end_date)
+
+df_pred_arma[start_date:end_date].plot(figsize = (20,5), color = "red")   
+df_test.ret_ftse[start_date:end_date].plot(color = "blue")
+plt.title("Predictions vs Actual (Returns)", size = 24)
+plt.show()
 
 
+df_pred_arma.head()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+df_pred_arma.tail()
 
 
 
