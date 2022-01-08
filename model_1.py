@@ -165,7 +165,7 @@ end_date = "2019-10-23"
 df_pred = results_ar.predict(start = start_date, end = end_date)
 
 
-df_pred[start_date:end_date].plot(figsize = (20,5), color = "red")
+df_pred[start_date:end_date].plot(figsize = (20,5), color = "blue")
 plt.title("Predicciones", size = 24)
 plt.show()
 
@@ -211,8 +211,11 @@ plt.show()
 
 # Los coeficientes no son significativos
 
-results_ret_ma.summary()    
-
+for i in range(len(results_ret_ma.pvalues)):
+    if i >= 0.05:
+        print('Hay por lo menos un coeficiente no significativo')
+        
+    
 
 
 
