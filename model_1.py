@@ -247,10 +247,158 @@ df_pred_arma.tail()
 #%%
 
 
+# Probando un modelo ARMAX, sin la parte de integracion y variables exogenas.
+
+# Estos modelos no son convenientes para proyectar el futuro ya que usa variables exogenas 
+
+
+model_ret_armax = ARIMA(df.ret_ftse[1:], exog = df[["ret_spx","ret_dax","ret_nikkei"]][1:], order = (1,0,1))
+
+
+results_ret_armax = model_ret_armax.fit()
+
+start_date = "2014-07-16"
+
+
+end_date = "2015-01-01"
+
+
+df_pred_armax = results_ret_armax.predict(start = start_date, end = end_date, 
+                                          exog = df_test[["ret_spx","ret_dax","ret_nikkei"]][start_date:end_date]) 
+
+df_pred_armax[start_date:end_date].plot(figsize = (20,5), color = "red")
+df_test.ret_ftse[start_date:end_date].plot(color = "blue")
+plt.title("Prediccion vs Actual (Returns)", size = 24)
+plt.show()
 
 
 
 
+
+#%%
+
+
+
+
+# Utilizando modelos estacionales SARIMAX
+
+
+
+end_date = "2015-01-01"
+
+
+# Los modelos estacionales van a tener 4 ordenes mas , los primeros son los estacionales y el ultimo es la duracion del ciclo estacional
+
+# En el ultimo ponemos 5 ya que estudiamos la semana y esos son los dias habiles 
+
+
+model_ret_sarma = SARIMAX(df.ret_ftse[1:], order = (3,0,4), seasonal_order = (3,0,2,5))
+
+results_ret_sarma = model_ret_sarma.fit()
+
+df_pred_sarma = results_ret_sarma.predict(start = start_date, end = end_date)
+
+
+# En los resultados vemos valores muy cercanos a cero 
+
+
+df_pred_sarma[start_date:end_date].plot(figsize = (20,5), color = "red")
+df_test.ret_ftse[start_date:end_date].plot(color = "blue")
+plt.title("Predictions vs Actual (SARMA)", size = 24)
+plt.show()
+
+
+
+
+
+
+#%%
+
+
+# Introduciendo variables exogenas al modelo estacional SARIMAX
+
+
+end_date = "2015-01-01"
+
+
+# Ponemos las variables exogenas en el ajuste y la prediccion:
+
+model_ret_sarimax = SARIMAX(df.ret_ftse[1:], exog = df[["ret_spx","ret_dax","ret_nikkei"]][1:], 
+                            order = (3,0,4), seasonal_order = (3,0,2,5))
+results_ret_sarimax = model_ret_sarimax.fit()
+
+df_pred_sarimax = results_ret_sarimax.predict(start = start_date, end = end_date, 
+                                              exog = df_test[["ret_spx","ret_dax","ret_nikkei"]][start_date:end_date]) 
+
+df_pred_sarimax[start_date:end_date].plot(figsize = (20,5), color = "red")
+df_test.ret_ftse[start_date:end_date].plot(color = "blue")
+plt.title("Prediccion vs Actual (SARIMAX)", size = 24)
+plt.show()
+
+
+
+
+
+
+
+#%%
+
+# Utilizando el AUTO ARIMA para ver cual es el mejor modelo
+
+
+
+
+model_auto = auto_arima(df.ret_ftse[1:], exogenous = df[['ret_spx', 'ret_dax', 'ret_nikkei']][1:],
+                       m = 5, max_p = 5, max_q = 5, max_P = 5, max_Q = 5)
+
+
+df_auto_pred = pd.DataFrame(model_auto.predict(n_periods = len(df_test[start_date:end_date]),
+                            exogenous = df_test[['ret_spx', 'ret_dax', 'ret_nikkei']][start_date:end_date]),
+                            index = df_test[start_date:end_date].index)
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
 
 
 
@@ -295,39 +443,7 @@ df_pred_arma.tail()
 
 
 
-
 #%%
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#%%
-
-
-
-
-
-
 
 
 
