@@ -363,6 +363,295 @@ df_auto_pred = pd.DataFrame(model_auto.predict(n_periods = len(df_test[start_dat
 #%%
 
 
+# La mayoria de los modelos no estaban integrados, por lo tanto, las previsiones de precios fueron peores que las de retornos.
+
+
+# Grafico con todos los modelos estimados
+
+end_date = "2015-01-01"
+df_pred_ar[start_date:end_date].plot(figsize = (20,10), color = "yellow")
+df_pred_ma[start_date:end_date].plot(color = "pink")
+df_pred_arma[start_date:end_date].plot(color = "cyan")
+df_pred_armax[start_date:end_date].plot(color = "green")
+df_pred_sarma[start_date:end_date].plot(color = "magenta")
+df_pred_sarimax[start_date:end_date].plot(color = "red")
+df_test.ret_ftse[start_date:end_date].plot(color = "blue")
+plt.legend(['AR','MA','ARMA','ARMAX','SARMA','SARMAX'])
+plt.title("Todos los modelos", size = 24)
+plt.show()
+
+
+
+
+
+#%%
+
+
+# Prediccion de la volatilidad
+
+
+# Estos son los valores predeterminados que tiene el comando arch_model.
+
+mod_garch = arch_model(df_comp.ret_ftse[1:], vol = "GARCH", p = 1, q = 1, mean = "constant", dist = "Normal")
+
+
+# En lasto obs le ponemos la fecha de comienzo, esto nos asegurara que solo estemos ajustando conjunto de entrenamiento en el modelo.
+
+res_garch = mod_garch.fit(last_obs = start_date, update_freq = 10)
+
+
+
+# En  este comando haremos el pronostico. El horizonte es 1 ya que es diario. Align determina si queremos hacer coincidir el valor con la fecha para la que se hace la prediccion o con la que se supone que representa
+
+
+pred_garch = res_garch.forecast(horizon = 1, align = 'target')
+
+
+
+# Con zorder ponemos uno arriba del otro
+
+pred_garch.residual_variance[start_date:].plot(figsize = (20,5), color = "red", zorder = 2)
+df_test.ret_ftse.abs().plot(color = "blue", zorder = 1)
+plt.title("Volatilidad Predicciones", size = 24)
+plt.show()
+
+
+# Hasta ahora se han realizado predicciones dentro del conjunto de pruebas en vez de pronosticar el futuro. 
+
+
+
+
+
+#%%
+
+
+# Modelo de regresion multivariado:
+    
+# Se llaman modelos VAR = Vectoriales
+
+# Vectorial Autoregresivo
+
+
+from statsmodels.tsa.api import VAR
+
+
+# Creamos el data set de las cuatro series temporales juntas
+
+df_ret = df[['ret_spx', 'ret_dax', 'ret_ftse', 'ret_nikkei']][1:]
+
+
+# Le pasamos el data set a la funcion VAR
+
+model_var_ret = VAR(df_ret)
+
+# El modelo seleccione un orden especifico, el valor numerico va a ser el orden maximo del modelo, cuantas mas series de tiempo mayor sera este valor
+
+model_var_ret.select_order(20)
+
+# El modelo se ajustara bajo AIC
+
+results_var_ret = model_var_ret.fit(ic = 'aic')
+
+# Al final del summary podemos ver una matriz de correlaciones
+
+results_var_ret.summary()
+
+
+#%%
+
+
+
+# El parametro lag order ret sera una variable que contiene el orden de retraso del modelo que deriva del resultado del modelo anterior (5)
+
+# El metodo forecast se encarga de los pronosticos
+
+
+lag_order_ret = results_var_ret.k_ar
+
+var_pred_ret = results_var_ret.forecast(df_ret.values[-lag_order_ret:], len(df_test[start_date:end_date]))
+
+df_ret_pred = pd.DataFrame(data = var_pred_ret, index = df_test[start_date:end_date].index,
+                                columns = df_test[start_date:end_date].columns[4:8])
+
+
+
+df_ret_pred.ret_nikkei[start_date:end_date].plot(figsize = (20,5), color = "red")
+df_test.ret_nikkei[start_date:end_date].plot(color = "blue")
+plt.title("Real vs Prediccion", size = 24)
+plt.show()
+
+
+
+
+results_var_ret.plot_forecast(1000)
+plt.show()
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
 
 
 
@@ -421,32 +710,6 @@ df_auto_pred = pd.DataFrame(model_auto.predict(n_periods = len(df_test[start_dat
 
 
 #%%
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#%%
-
-
-
 
 
 
